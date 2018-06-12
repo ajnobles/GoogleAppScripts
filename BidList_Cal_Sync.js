@@ -1,4 +1,3 @@
-// IMPORT CODE
 // NEEDS TO IMPLEMENT
 //     ALARM FUNCTIONALITY
 //     REMOVE GOOGLE HANGOUT INFORMATION
@@ -18,20 +17,27 @@ var PREBID_TIME = ARRAY_ID++;
 var ADDENDUM = ARRAY_ID++;
 var HVAC = ARRAY_ID++;
 var PLUMBING = ARRAY_ID++;
-var HVAC_PRICE = -1;
-var PLUMBING_PRICE = -1;
-var SITE_PRICE = -1
-var ALTERNATE_PRICE = -1;
+var HVAC_PRICE = ARRAY_ID++;
+var PLUMBING_PRICE = ARRAY_ID++;
+var SITE_PRICE = ARRAY_ID++;
+var ALTERNATE_PRICE = ARRAY_ID++;
+var TOTAL_PRICE = ARRAY_ID++;
+var BIDDER1 =ARRAY_ID++;
+var BIDDER2 =ARRAY_ID++;
+var BIDDER3 =ARRAY_ID++;
+var BIDDER4 =ARRAY_ID++;
+var FEEDBACK_REC = ARRAY_ID++;
+var FEEDBACK = ARRAY_ID++;
 var SHAREFILE = ARRAY_ID++;
 var GOOGLE_CAL_EVENT_ID = ARRAY_ID++;
 var GOOGLE_CAL_EVENT_ID_PREBID = ARRAY_ID++;
 Logger.log("ARRAY_ID: " + ARRAY_ID + "\n");
 
 // OTHER GLOBALS
-var GOOGLE_CAL_ID = ""  // INSERT CALENDAR ID BETWEEN QUOTES
-var SPREADSHEET = "";  // INSERT SPREADSHEET SHEETNAME BETWEEN QUOTES
-var SLEEP = 1000;
-var SLEEP_MOD_OCCUR = 10;
+var GOOGLE_CAL_ID = "elitemech.us_e4gqg6qhvd2jr8ip6hlgdafnfo@group.calendar.google.com"
+var SPREADSHEET = "2018 BID LIST MASTER";
+var SLEEP = 3000;  // (NUMBER OF SECONDS * 1000)
+var SLEEP_MOD_OCCUR = 10;  // LOWER NUMBER CAUSES MORE SLEEP OCCURANCES
 var BID_ALARM = 24;   // IN HOURS
 var PREBID_ALARM = 6; // IN HOURS
 var BID_COLOR = 9;
@@ -55,7 +61,7 @@ function refreshCalendar() {
   Logger.log("NUMBER OF ROWS: " + values.length);
   
   var i = values.length-1;
-  while(values[i--][TITLE] == null);
+//  while(values[i--][TITLE] == undefined);
   
   // ITERATE OVER ITEMS IN SPREADSHEET
 //  for (var i = 1; i < values.length && values[ID]; i++) {
