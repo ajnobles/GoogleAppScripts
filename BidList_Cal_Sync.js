@@ -17,6 +17,7 @@ var PREBID_TIME = ARRAY_ID++;
 var ADDENDUM = ARRAY_ID++;
 var HVAC = ARRAY_ID++;
 var PLUMBING = ARRAY_ID++;
+var SQUARE_FOOTAGE = ARRAY_ID++;
 var HVAC_PRICE = ARRAY_ID++;
 var PLUMBING_PRICE = ARRAY_ID++;
 var SITE_PRICE = ARRAY_ID++;
@@ -36,7 +37,7 @@ Logger.log("ARRAY_ID: " + ARRAY_ID + "\n");
 // OTHER GLOBALS
 var GOOGLE_CAL_ID = "elitemech.us_e4gqg6qhvd2jr8ip6hlgdafnfo@group.calendar.google.com"
 var SPREADSHEET = "2018 BID LIST MASTER";
-var SLEEP = 3000;  // (NUMBER OF SECONDS * 1000)
+var SLEEP = 1000;  // (NUMBER OF SECONDS * 1000)
 var SLEEP_MOD_OCCUR = 10;  // LOWER NUMBER CAUSES MORE SLEEP OCCURANCES
 var BID_ALARM = 24;   // IN HOURS
 var PREBID_ALARM = 6; // IN HOURS
@@ -45,12 +46,14 @@ var PREBID_COLOR = 11;
 var DEFAULT_TIME = "17:00:00";
 var DELETE_START = "01/01/2017 12:00 AM"
 var DELETE_STOP = "12/31/2018 11:59 PM"
+var DEBUG = false;
 
 
 // MAIN FUNCTION TO RUN CALENDAR UPDATES
 function refreshCalendar() {
   var cal_Id = GOOGLE_CAL_ID;
   
+  // RETRIEVE SPREADSHEET DATA
   var ss = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SPREADSHEET);
   var dataRange = ss.getDataRange();
   var values = dataRange.getValues();
@@ -61,16 +64,15 @@ function refreshCalendar() {
   Logger.log("NUMBER OF ROWS: " + values.length);
   
   var i = values.length-1;
-//  while(values[i--][TITLE] == undefined);
   
   // ITERATE OVER ITEMS IN SPREADSHEET
-//  for (var i = 1; i < values.length && values[ID]; i++) {
   for (; i >= 1 && values[ID]; i--) {
     var value = values[i];
     
-    Logger.log(value[TITLE]);
+//    Logger.log(value[TITLE]);
     
     // BID EVENTS
+    //    IF EXISTING EVENT
     if (value[GOOGLE_CAL_EVENT_ID]) {
       if (value[DATE]) {
         updateBid(ss, cal, value, i);
@@ -82,12 +84,14 @@ function refreshCalendar() {
       }
     }
     
+    //    NEW EVENT
     else if(value[TITLE] && value[DATE]) {
       addBid(ss, cal, value, i);
       numEventsAdded++;
     }
     
     // PRE-BID EVENTS
+    //     EXISTING EVENT
     if (value[GOOGLE_CAL_EVENT_ID_PREBID]) {
       if (value[DATE]) {
         updatePreBid(ss, cal, value, i);
@@ -99,14 +103,21 @@ function refreshCalendar() {
       }
     }
     
+    //    NEW EVENT
     else if(value[TITLE] && value[PREBID_DATE]) {
       addPreBid(ss, cal, value, i);
       numEventsAdded++;
     }
     
     // USED FOR DEBUGGING
-    Logger.log("i: " + i);
+    //    IF (NOT) DEBUG - PRINTS ONLY ROWS WITH TITLES
+    //    ELSE - PRINTS ALL ROWS (EXCEPT ROW 0)
+    if (value[TITLE] || DEBUG) {
+      Logger.log("i: " + i);
+      Logger.log(value[TITLE]);
+    }
     
+    //  USED TO AVOID TOO FREQUENT UPDATES/REQUEST
     if (numEventsAdded % SLEEP_MOD_OCCUR == 0) {
       Utilities.sleep(SLEEP)
     }
@@ -179,7 +190,7 @@ function updateBid(ss, cal, value, i) {
     currentEvent.setDescription(newValues.description);
   }
   
-  // TEST ALARM
+  // TEST ALARM - NOT YET IMPLEMENTED
 }
 
 
@@ -283,6 +294,13 @@ function buildDescription(value)
   description += "\nPLUMBING: ";
   description += (value[PLUMBING] || "No Bid");
   
+  description += "\nSquare Footage: ";
+  description += (value[SQUARE_FOOTAGE] || "Not Available");
+
+  if (value[SQUARE_FOOTAGE]) {
+      description += " sqFt";
+  }
+
   description += "\nSHAREFILE: " + value[SHAREFILE] + "\n";
   
   return description;
@@ -290,8 +308,11 @@ function buildDescription(value)
 
 
 function parseDate(date, time) {
-//  Logger.log("date: " + date);
-//  Logger.log("\ntime: " + time);
+  
+  if (DEBUG) {
+    Logger.log("date: " + date);
+    Logger.log("\ttime: " + time);
+  }
   
   var dateString = "";
   dateString += date;
@@ -372,10 +393,10 @@ function parseDate(date, time) {
     timeParsed += "0";
     
     // DO NOT DELETE LOOP
-// USE FOR DEBUGGING IF TIME ZONE MESSES UP
-//    for (var j = 0; j < 5; j++) {
-//      timeParsed += timeString[j+28];
-//    }
+    // USE FOR DEBUGGING IF TIME ZONE MESSES UP
+    for (var j = 0; j < 5 && DEBUG; j++) {
+      timeParsed += timeString[j+28];
+    }
   }
   
   // ELSE NO TIME LISTED
@@ -383,12 +404,15 @@ function parseDate(date, time) {
     timeParsed = DEFAULT_TIME;
   }
   
-//  Logger.log(timeParsed);
+  if (DEBUG) {
+    Logger.log(timeParsed);
+  }
   
   var newDateString = dateParsed + " " + timeParsed;
   
   return newDateString;
 }
+
 
 function deleteAll()
 {
